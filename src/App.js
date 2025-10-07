@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
 import MOVIE_KEY from "./config";
 
@@ -60,6 +60,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('')
   const [selectedId, setSelectedId] = useState(null)
+
   const [watched, setWatched] = useState(() => {
     const value = localStorage.getItem('watched');
     return JSON.parse(value);
@@ -177,8 +178,27 @@ function Loader() {
 function ErrorMsg({ message }) {
   return <h1 className="error">{message}</h1>
 }
-
+ 
 function Navbar({ movies, query, setQuery }) {
+  // useRef Hook 
+  const inputElement = useRef(null);
+  useEffect(() => {
+
+    function callBack(e) {
+      if(document.activeElement === inputElement.current) return;
+      
+      if(e.key === 'Enter'){
+      inputElement.current.focus();
+      setQuery('');
+      }
+    }
+
+    document.addEventListener('keydown' , callBack)
+
+    return () => document.addEventListener('keydown' , callBack);
+
+  },[])
+
   return (
     <nav className="nav-bar">
       <div className="logo">
@@ -191,9 +211,10 @@ function Navbar({ movies, query, setQuery }) {
         placeholder="Search movies..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
+        ref={inputElement}
       />
       <p className="num-results">
-        Found <strong>{ }</strong> results
+        Found <strong>{0}</strong> results
       </p>
     </nav>
   );
